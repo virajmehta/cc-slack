@@ -1,0 +1,19 @@
+{
+  "name": "cc-slack",
+  "version": "1.0.0",
+  "description": "Claude Code PreToolUse hook that routes tool approvals through Slack",
+  "main": "build/hook.js",
+  "scripts": {
+    "build": "tsc",
+    "test:e2e": "tsx scripts/test-e2e.ts",
+    "install-hook": "bash scripts/install.sh"
+  },
+  "dependencies": {
+    "@slack/web-api": "^7.9.0"
+  },
+  "devDependencies": {
+    "@types/node": "^22.0.0",
+    "tsx": "^4.19.0",
+    "typescript": "^5.7.0"
+  }
+}

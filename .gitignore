@@ -1,0 +1,7 @@
+node_modules/
+build/
+.env
+.envrc
+*.tsbuildinfo
+.DS_Store
+.claude/settings.local.json
