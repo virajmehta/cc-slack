@@ -1,19 +1,10 @@
 #!/usr/bin/env tsx
 
-/**
- * Manual E2E test: sends a fake Bash hook input through the hook
- * and waits for a Slack reaction.
- *
- * Usage: SLACK_BOT_TOKEN=xoxb-... SLACK_USER_ID=U... npx tsx scripts/test-e2e.ts
- */
-
 import { spawn } from "node:child_process";
 import path from "node:path";
+import { fileURLToPath } from "node:url";
 
-const hookPath = path.resolve(
-  new URL(".", import.meta.url).pathname,
-  "../build/hook.js",
-);
+const hookPath = path.resolve(fileURLToPath(import.meta.url), "../../build/hook.js");
 
 const input = JSON.stringify({
   tool_name: "Bash",
@@ -23,7 +14,6 @@ const input = JSON.stringify({
 console.log("Spawning hook with test input...");
 const child = spawn("node", [hookPath], {
   stdio: ["pipe", "pipe", "inherit"],
-  env: { ...process.env },
 });
 
 child.stdin.write(input);
