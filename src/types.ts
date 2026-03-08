@@ -1,6 +1,8 @@
 export interface HookInput {
+  session_id: string;
   tool_name: string;
   tool_input: Record<string, unknown>;
+  permission_mode?: string;
 }
 
 export interface HookOutput {
@@ -10,4 +12,4 @@ export interface HookOutput {
   };
 }
 
-export type ReactionDecision = "approved" | "denied" | "pending";
+export type ReactionDecision = "approved" | "allow_all" | "denied" | "pending";

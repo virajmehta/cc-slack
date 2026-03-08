@@ -10,6 +10,7 @@ const TIMEOUT_MS = 5 * 60 * 1000;
 
 const DECISION_TO_PERMISSION: Record<ReactionDecision, "allow" | "deny" | "ask"> = {
   approved: "allow",
+  allow_all: "allow",
   denied: "deny",
   pending: "ask",
 };
@@ -25,6 +26,18 @@ function makeOutput(decision: "allow" | "deny" | "ask"): HookOutput {
 
 function isEnabled(): boolean {
   return fs.existsSync(flagFile());
+}
+
+function allowAllFile(sessionId: string, toolName: string): string {
+  return `/tmp/cc-slack-allowall-${sessionId}-${toolName}`;
+}
+
+function isToolAllowedAll(sessionId: string, toolName: string): boolean {
+  return fs.existsSync(allowAllFile(sessionId, toolName));
+}
+
+function markToolAllowedAll(sessionId: string, toolName: string): void {
+  fs.writeFileSync(allowAllFile(sessionId, toolName), "");
 }
 
 function formatDescription(input: HookInput): string {
@@ -65,9 +78,26 @@ async function main(): Promise<void> {
   }
 
   const input: HookInput = JSON.parse(raw);
+
+  // Respect Claude Code's permission mode
+  if (input.permission_mode === "bypassPermissions") {
+    process.stdout.write(JSON.stringify(makeOutput("allow")));
+    return;
+  }
+
+  // Skip if user already allowed-all this tool type in this session
+  if (isToolAllowedAll(input.session_id, input.tool_name)) {
+    process.stdout.write(JSON.stringify(makeOutput("allow")));
+    return;
+  }
+
   const description = formatDescription(input);
   const { channel, ts } = await sendApprovalRequest(description);
   const decision = await waitForDecision(channel, ts, TIMEOUT_MS);
+
+  if (decision === "allow_all") {
+    markToolAllowedAll(input.session_id, input.tool_name);
+  }
 
   process.stdout.write(JSON.stringify(makeOutput(DECISION_TO_PERMISSION[decision])));
 }

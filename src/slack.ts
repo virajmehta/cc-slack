@@ -33,7 +33,7 @@ export async function sendApprovalRequest(
         elements: [
           {
             type: "mrkdwn",
-            text: "React :white_check_mark: to approve or :x: to deny",
+            text: ":white_check_mark: approve · :unlock: allow all of this tool · :x: deny",
           },
         ],
       },
@@ -52,6 +52,7 @@ export async function checkReactions(
   const hasReaction = (name: string): boolean =>
     reactions.some((r) => r.name === name && r.users?.includes(userId));
 
+  if (hasReaction("unlock")) return "allow_all";
   if (hasReaction("white_check_mark")) return "approved";
   if (hasReaction("x")) return "denied";
   return "pending";
