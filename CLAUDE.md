@@ -11,7 +11,7 @@ pnpm install && pnpm run build
 ## Install globally
 
 ```
-pnpm run install-hook
+pnpm run install
 ```
 
 ## Required env vars
@@ -32,6 +32,18 @@ Slack mode is off by default. Toggle with slash commands:
 ```
 CC_SLACK_BOT_TOKEN=xoxb-... CC_SLACK_USER_ID=U... pnpm run test:e2e
 ```
+
+## Messaging
+
+`/slack-message` lets Claude send you a Slack DM and wait for your threaded reply. Works independently of `/slack-on` — no need to enable approval mode.
+
+```
+node build/message.js "Your message"              # send + wait for reply (10 min)
+node build/message.js --no-wait "Notification"     # fire-and-forget
+node build/message.js --timeout 30m "Review this"  # custom timeout
+```
+
+Output is JSON on stdout: `{"reply":"..."}`, `{"reply":null,"timeout":true}`, or `{"sent":true}`.
 
 ## How it works
 

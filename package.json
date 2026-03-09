@@ -6,7 +6,7 @@
   "scripts": {
     "build": "tsc",
     "test:e2e": "tsx scripts/test-e2e.ts",
-    "install-hook": "bash scripts/install.sh"
+    "install": "bash scripts/install.sh"
   },
   "dependencies": {
     "@slack/web-api": "^7.9.0"

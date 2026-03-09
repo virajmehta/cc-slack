@@ -78,3 +78,53 @@ export async function waitForDecision(
   }
   return "pending";
 }
+
+export async function sendMessage(
+  text: string,
+  expectReply = true,
+): Promise<{ channel: string; ts: string }> {
+  const channel = await getDmChannel();
+  const blocks = expectReply
+    ? [
+        { type: "section" as const, text: { type: "mrkdwn" as const, text } },
+        {
+          type: "context" as const,
+          elements: [
+            { type: "mrkdwn" as const, text: "_Reply in a thread to respond_" },
+          ],
+        },
+      ]
+    : [
+        { type: "section" as const, text: { type: "mrkdwn" as const, text } },
+      ];
+  const res = await client.chat.postMessage({ channel, text, blocks });
+  return { channel, ts: res.ts! };
+}
+
+export async function waitForThreadReply(
+  channel: string,
+  messageTs: string,
+  timeoutMs: number,
+  signal?: AbortSignal,
+): Promise<string | null> {
+  const deadline = Date.now() + timeoutMs;
+  while (Date.now() < deadline) {
+    if (signal?.aborted) return null;
+    const res = await client.conversations.replies({
+      channel,
+      ts: messageTs,
+      limit: 10,
+    });
+    const reply = res.messages?.find(
+      (m) => m.ts !== messageTs && m.user === userId,
+    );
+    if (reply?.text) return reply.text;
+    await new Promise<void>((resolve) => {
+      const timer = setTimeout(resolve, POLL_INTERVAL_MS);
+      if (signal) {
+        signal.addEventListener("abort", () => { clearTimeout(timer); resolve(); }, { once: true });
+      }
+    });
+  }
+  return null;
+}
